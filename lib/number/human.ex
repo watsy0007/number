@@ -59,21 +59,11 @@ defmodule Number.Human do
 
   def number_to_human(number, options) do
     cond do
-      cmp(number, ~d(999)) == :gt && cmp(number, ~d(1_000_000)) == :lt ->
-        delimit(number, ~d(1_000), "Thousand", options)
+      cmp(number, ~d(9999)) == :gt && cmp(number, ~d(1_0000_0000)) == :lt ->
+        delimit(number, ~d(1_0000), "万", options)
 
-      cmp(number, ~d(1_000_000)) in [:gt, :eq] and cmp(number, ~d(1_000_000_000)) == :lt ->
-        delimit(number, ~d(1_000_000), "Million", options)
-
-      cmp(number, ~d(1_000_000_000)) in [:gt, :eq] and cmp(number, ~d(1_000_000_000_000)) == :lt ->
-        delimit(number, ~d(1_000_000_000), "Billion", options)
-
-      cmp(number, ~d(1_000_000_000_000)) in [:gt, :eq] and
-          cmp(number, ~d(1_000_000_000_000_000)) == :lt ->
-        delimit(number, ~d(1_000_000_000_000), "Trillion", options)
-
-      cmp(number, ~d(1_000_000_000_000_000)) in [:gt, :eq] ->
-        delimit(number, ~d(1_000_000_000_000_000), "Quadrillion", options)
+      cmp(number, ~d(1_0000_0000)) in [:gt, :eq] ->
+        delimit(number, ~d(1_0000_0000), "亿", options)
 
       true ->
         number_to_delimited(number, options)
