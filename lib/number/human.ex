@@ -61,7 +61,7 @@ defmodule Number.Human do
     cond do
       cmp(number, ~d(-1_0000_0000)) in [:lt, :eq] ->
         delimit(number, ~d(-1_0000_0000), "亿", options)
-      cmp(number, ~d(-1_0000)) == :lt && cmp(number, 0) == :gt ->
+      cmp(number, ~d(-1_0000)) == :lt && cmp(number, ~d(-1_0000_0000)) == :gt ->
         delimit(number, ~d(-1_0000), "万", options)
       cmp(number, ~d(9999)) == :gt && cmp(number, ~d(1_0000_0000)) == :lt ->
         delimit(number, ~d(1_0000), "万", options)
@@ -116,7 +116,7 @@ defmodule Number.Human do
   defp delimit(number, divisor, label, options) do
     number =
       number
-      |> Decimal.div(abs(divisor))
+      |> Decimal.div(Decimal.abs(divisor))
       |> number_to_delimited(options)
 
     number <> " " <> label
