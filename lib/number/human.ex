@@ -107,6 +107,7 @@ defmodule Number.Human do
     |> String.replace("_", "")
     |> String.to_integer()
     |> Decimal.new()
+    |> abs
   end
 
   defp delimit(number, divisor, label, options) do
