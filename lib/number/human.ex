@@ -157,6 +157,6 @@ defmodule Number.Human do
       |> Decimal.div(Decimal.abs(divisor))
       |> number_to_delimited(options)
 
-    number <> " " <> label
+    number <> "" <> label
   end
 end
