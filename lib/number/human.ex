@@ -42,13 +42,13 @@ defmodule Number.Human do
       ** (ArgumentError) number must be a float, integer or implement `Number.Conversion` protocol, was 'charlist'
 
   """
-  def number_to_human(number, options \\ [])
+  def number_to_human(number, options \\ [], locale \\ "en_US")
 
-  def number_to_human(number, options) when not is_map(number) do
+  def number_to_human(number, options, locale) when not is_map(number) do
     if Number.Conversion.impl_for(number) do
       number
       |> Number.Conversion.to_decimal()
-      |> number_to_human(options)
+      |> number_to_human(options, locale)
     else
       raise ArgumentError,
             "number must be a float, integer or implement `Number.Conversion` protocol, was #{
@@ -57,17 +57,55 @@ defmodule Number.Human do
     end
   end
 
-  def number_to_human(number, options) do
+  def number_to_human(number, options, locale) do
+    case locale do
+      "zh_CN" -> number_to_human_cn(number, options)
+      _ -> number_to_human_en(number, options)
+    end
+  end
+
+  defp number_to_human_cn(number, options) do
     cond do
       cmp(number, ~d(-1_0000_0000)) in [:lt, :eq] ->
         delimit(number, ~d(-1_0000_0000), "亿", options)
-      cmp(number, ~d(-1_0000)) == :lt && cmp(number, ~d(-1_0000_0000)) == :gt ->
+      cmp(number, ~d(-1_0000)) in [:lt, :eq] && cmp(number, ~d(-1_0000_0000)) == :gt ->
         delimit(number, ~d(-1_0000), "万", options)
       cmp(number, ~d(9999)) == :gt && cmp(number, ~d(1_0000_0000)) == :lt ->
         delimit(number, ~d(1_0000), "万", options)
 
       cmp(number, ~d(1_0000_0000)) in [:gt, :eq] ->
         delimit(number, ~d(1_0000_0000), "亿", options)
+
+      true ->
+        number_to_delimited(number, options)
+    end
+  end
+
+  defp number_to_human_en(number, options) do
+    cond do
+      cmp(number, ~d(-1_000_000_000_000_000)) == :gt && cmp(number, ~d(-1_000_000_000_000)) in [:lt, :eq] ->
+        delimit(number, ~d(-1_000_000_000_000), "t", options)
+
+      cmp(number, ~d(-1_000_000_000_000)) == :gt && cmp(number, ~d(-1_000_000_000)) in [:lt, :eq] ->
+        delimit(number, ~d(-1_000_000_000), "b", options)
+
+      cmp(number, ~d(-1_000_000_000)) == :gt && cmp(number, ~d(-1_000_000)) in [:lt, :eq] ->
+        delimit(number, ~d(-1_000_000), "m", options)
+
+      cmp(number, ~d(-1_000_000)) == :gt && cmp(number, ~d(-1_000)) in [:lt, :eq] ->
+        delimit(number, ~d(-1_000), "k", options)
+
+      cmp(number, ~d(999)) == :gt && cmp(number, ~d(1_000_000)) == :lt ->
+        delimit(number, ~d(1_000), "k", options)
+
+      cmp(number, ~d(1_000_000)) in [:gt, :eq] and cmp(number, ~d(1_000_000_000)) == :lt ->
+        delimit(number, ~d(1_000_000), "m", options)
+
+      cmp(number, ~d(1_000_000_000)) in [:gt, :eq] and cmp(number, ~d(1_000_000_000_000)) == :lt ->
+        delimit(number, ~d(1_000_000_000), "b", options)
+
+      cmp(number, ~d(1_000_000_000_000)) == :gt and cmp(number, ~d(1_000_000_000_000_000)) == :lt ->
+        delimit(number, ~d(1_000_000_000_000), "t", options)
 
       true ->
         number_to_delimited(number, options)
